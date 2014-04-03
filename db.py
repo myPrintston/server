@@ -61,13 +61,13 @@ def updateRecord(table, columns, values, ids, idVals):
         print (cmd)
 
         # record does not exist; create it
-        if (!cursor.execute(cmd)):
-        		c = "INSERT INTO %s () VALUES ()" % table
+        if (cursor.execute(cmd)==0):
+                c = "INSERT INTO %s () VALUES ()" % table
                 print (c)
                 cursor.execute(c)
 
         c = ", ".join('%s="%s"' % a for a in zip(columns, values));
-        cmd = "UPDATE %s SET" % table
+        cmd = "UPDATE %s SET " % table
         cmd += c + " WHERE " + constraints                
 
         print (cmd)
@@ -103,4 +103,4 @@ def getRecord(table, column, identifier, idVal):
         cnx.close()
         return val
 
-updatePrinter("White House", "Baracks Room", force=1);
+updatePrinter(("White House"), ("Baracks Room"), force=1);
