@@ -48,23 +48,31 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 ## All SQL updating should happen through this function. 
 ## If the specified field does not exist, creates a row for it.
 ## Note that usage of %s in python causes automatic escaping
-def updateRecord(table, column, value, identifier, idVal):
+def updateRecord(table, columns, values, ids, idVals):
+	if (ids.length() != idVals.length()):
+		print "Unequal number of ids and idVals: " + ids + " " + idVals;
+		return;
+
 	cnx    = mysql.connector.connect(user=usr, database=database)
 	cursor = cnx.cursor()
-	data   = (table, identifier, idVal)
+	constraints = " AND ".join("%s=%s" % a for a in zip(ids, idVals));
+	data   = (table, constraints);
 
 	# check if the key with identifier=idVal is in the table; if not, it needs to be inserted
-	cmd  = "SELECT 1 FROM %s WHERE %s=%s"
+	cmd  = "SELECT 1 FROM %s WHERE %s"
 
 	# record exists
 	if (cursor.execute(cmd), data):
-		cmd  = "UPDATE %s SET %s=%s WHERE %s=%s"
-		data = (table, column, value, identifier, idVal)
+		c = ", ".join("%s=%s" % a for a in zip(columns, values));
+		cmd  = "UPDATE %s SET %s WHERE %s"
+		data = (table, c, constraints)
 
-	# record does not exist
+	# record does not exist - create it
 	else:
-		cmd  = "INSERT INTO %s (%s, %s) VALUES (%s, %s)"
-		data = (table, identifier, column, idVal, value)
+		i = ", ".join(ids.append(columns))      # columns
+		v = ", ".join(idVals.append(values))    # values
+		cmd  = "INSERT INTO %s (%s) VALUES (%s)"
+		data = (table, i, v)
 	
 	cursor.execute(cmd, data)
 	cnx.commit()
@@ -97,8 +105,7 @@ def getRecord(table, column, identifier, idVal):
 	cursor.close()
 	cnx.close()
 	return val
-
-
+	
 def getPrinterID(buildingName, roomNumber):
 	cnx    = mysql.connector.connect(user=usr, database=database)
 	cursor = cnx.cursor()
@@ -117,4 +124,4 @@ def getPrinterID(buildingName, roomNumber):
 	cursor.close();
 	cnx.close();
 
-updatePrinter("White House", "Barack's Room", force=1);
+updatePrinter("White House", "Baracks Room", force=1);
