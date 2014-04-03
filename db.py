@@ -17,9 +17,9 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 	altitude = None):
 	
 	update = force
+	locVal = (buildingName, roomNumber)
+	loc    = ("buildingName", "roomNumber")
 	# Query error table for errors with this printer that are not cleared; if not, set update to true
-
-	printID = getPrinterID(buildingName, roomNumber);
 
 	# Error reported for printer - compare timestamps
 	#if !update:
@@ -27,30 +27,28 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 	if update: 
 
 		if status != None:
-			updateRecord(printTable, "status", status, "id", printID)
+			updateRecord(printTable, "status", status, loc, locval)
 
 		if latitude != None:
-			updateRecord(printTable, "latitude", latitude, "id", printID)
+			updateRecord(printTable, "latitude", latitude, loc, locval)
 
 		if longitude != None:
-			updateRecord(printTable, "longitude", longitude, "id", printID)
+			updateRecord(printTable, "longitude", longitude, loc, locval)
 
 		if altitude!= None:
-			updateRecord(printTable, "altitude", altitude, "id", printID)
+			updateRecord(printTable, "altitude", altitude, loc, locval)
 
 		if buildingName != None:
-			updateRecord(printTable, "buildingName", buildingName, "id", printID)
+			updateRecord(printTable, "buildingName", buildingName, loc, locval)
 
 		if roomNumber != None:
-			updateRecord(printTable, "roomNumber", roomNumber, "id", printID)
+			updateRecord(printTable, "roomNumber", roomNumber, loc, locval)
 
 ## Updates the value of column in table for the with an identifier column that has the value idVal
 ## All SQL updating should happen through this function. 
 ## If the specified field does not exist, creates a row for it.
 ## Note that usage of %s in python causes automatic escaping
 def updateRecord(table, columns, values, ids, idVals):
-	
-	## to do: add error checking for column, values, ids, idVals length
 
 	cnx    = mysql.connector.connect(user=usr, database=database)
 	cursor = cnx.cursor()
@@ -104,23 +102,5 @@ def getRecord(table, column, identifier, idVal):
 	cursor.close()
 	cnx.close()
 	return val
-	
-def getPrinterID(buildingName, roomNumber):
-	cnx    = mysql.connector.connect(user=usr, database=database)
-	cursor = cnx.cursor()
-	cmd    = "SELECT 1 FROM %s WHERE buildingName=%s AND roomNumber=%s"
-	data   = (printTable, buildingName, roomNumber)
-	val    = cursor.execute(cmd, data);
-	if (val > 0):
-		cmd = "SELECT id FROM %s WHERE buildingName=%s AND roomNumber=%s"
-		val = cursor.execute(cmd, data);
-	else:
-		cmd = "SELECT currentID FROM %s WHERE name=printers"
-		val = cursor.execute(cmd, data);
-		updateRecord("ids", "currentID", val+1, "name", "printers")
-
-	cnx.commit();
-	cursor.close();
-	cnx.close();
 
 updatePrinter("White House", "Baracks Room", force=1);
