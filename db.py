@@ -60,17 +60,15 @@ def updateRecord(table, columns, values, ids, idVals):
 
         print (cmd)
 
-        # record exists
-        if (cursor.execute(cmd)):
-                c = ", ".join('%s="%s"' % a for a in zip(columns, values));
-                cmd = "UPDATE %s SET" % table
-                cmd += c + " WHERE " + constraints
-
-        # record does not exist - create it, then update it
-        else:
-                c = "INSERT INTO %s () VALUES ()" % table
+        # record does not exist; create it
+        if (!cursor.execute(cmd)):
+        		c = "INSERT INTO %s () VALUES ()" % table
                 print (c)
                 cursor.execute(c)
+
+        c = ", ".join('%s="%s"' % a for a in zip(columns, values));
+        cmd = "UPDATE %s SET" % table
+        cmd += c + " WHERE " + constraints                
 
         print (cmd)
         cursor.execute(cmd)
