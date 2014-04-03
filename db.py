@@ -54,6 +54,22 @@ def updateRecord(table, columns, values, ids, idVals):
         cursor = cnx.cursor()
         constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
 
+        if (isinstance(columns, tuple))
+        	columns = (columns,)
+
+
+        if (isinstance(values, tuple))
+        	values = (values,)
+
+
+        if (isinstance(ids, tuple))
+        	ids = (ids,)
+
+
+        if (isinstance(idVals, tuple))
+        	idVals = (idVals,)
+
+
         # check if the key with identifier=idVal is in the table; if not, it needs to be inserted
         cmd  = "SELECT 1 FROM %s WHERE " % table
         cmd += constraints
