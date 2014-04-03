@@ -49,9 +49,8 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 ## If the specified field does not exist, creates a row for it.
 ## Note that usage of %s in python causes automatic escaping
 def updateRecord(table, columns, values, ids, idVals):
-	if (ids.length() != idVals.length()):
-		print "Unequal number of ids and idVals: " + ids + " " + idVals;
-		return;
+	
+	## to do: add error checking for column, values, ids, idVals length
 
 	cnx    = mysql.connector.connect(user=usr, database=database)
 	cursor = cnx.cursor()
