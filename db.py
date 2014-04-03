@@ -27,22 +27,22 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 	if update: 
 
 		if status != None:
-			updateRecord(printTable, "status", status, loc, locval)
+			updateRecord(printTable, "status", status, loc, locVal)
 
 		if latitude != None:
-			updateRecord(printTable, "latitude", latitude, loc, locval)
+			updateRecord(printTable, "latitude", latitude, loc, locVal)
 
 		if longitude != None:
-			updateRecord(printTable, "longitude", longitude, loc, locval)
+			updateRecord(printTable, "longitude", longitude, loc, locVal)
 
 		if altitude!= None:
-			updateRecord(printTable, "altitude", altitude, loc, locval)
+			updateRecord(printTable, "altitude", altitude, loc, locVal)
 
 		if buildingName != None:
-			updateRecord(printTable, "buildingName", buildingName, loc, locval)
+			updateRecord(printTable, "buildingName", buildingName, loc, locVal)
 
 		if roomNumber != None:
-			updateRecord(printTable, "roomNumber", roomNumber, loc, locval)
+			updateRecord(printTable, "roomNumber", roomNumber, loc, locVal)
 
 ## Updates the value of column in table for the with an identifier column that has the value idVal
 ## All SQL updating should happen through this function. 
