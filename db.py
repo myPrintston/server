@@ -19,28 +19,30 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 	update = force
 	# Query error table for errors with this printer that are not cleared; if not, set update to true
 
+	printID = getPrinterID(buildingName, roomNumber);
+
 	# Error reported for printer - compare timestamps
 	#if !update:
 
 	if update: 
 
 		if status != None:
-			updateRecord(printTable, "status", status, "printID", printID)
+			updateRecord(printTable, "status", status, "id", printID)
 
 		if latitude != None:
-			updateRecord(printTable, "latitude", latitude, "printID", printID)
+			updateRecord(printTable, "latitude", latitude, "id", printID)
 
 		if longitude != None:
-			updateRecord(printTable, "longitude", longitude, "printID", printID)
+			updateRecord(printTable, "longitude", longitude, "id", printID)
 
 		if altitude!= None:
-			updateRecord(printTable, "altitude", altitude, "printID", printID)
+			updateRecord(printTable, "altitude", altitude, "id", printID)
 
 		if buildingName != None:
-			updateRecord(printTable, "buildingName", buildingName, "printID", printID)
+			updateRecord(printTable, "buildingName", buildingName, "id", printID)
 
 		if roomNumber != None:
-			updateRecord(printTable, "roomNumber", roomNumber, "printID", printID)
+			updateRecord(printTable, "roomNumber", roomNumber, "id", printID)
 
 ## Updates the value of column in table for the with an identifier column that has the value idVal
 ## All SQL updating should happen through this function. 
@@ -115,4 +117,4 @@ def getPrinterID(buildingName, roomNumber):
 	cursor.close();
 	cnx.close();
 
-
+updatePrinter("White House", "Barack's Room", force=1);
