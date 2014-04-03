@@ -7,13 +7,14 @@ usr        = "ubuntu"          # Username for database
 database   = "printers"        # Name of database
 printTable = "printers"        # Name of table for printers
 errorTable = "errors"          # Name of table for errors
+idTable    = "ids"             # Name of table for assigning ids
 
 
-## Given a printer id printID and any other data about a printer, updates the corresponding printer record
+## Given a printer buildingName, roomNumber, and any other data about a printer, updates the corresponding printer record
 ## Forces an update if force is true; otherwise, depends on whether an error is set; if not, the record is updated. if so,
 ## the record is only allowed to update if the current time minus the time it was last updated is larger than minTime
-def updatePrinter(printID, force = 0, status = None, latitude = None, longitude = None, 
-	altitude = None, buildingName = None, roomNumber = None):
+def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude = None, longitude = None, 
+	altitude = None):
 	
 	update = force
 	# Query error table for errors with this printer that are not cleared; if not, set update to true
@@ -27,7 +28,6 @@ def updatePrinter(printID, force = 0, status = None, latitude = None, longitude 
 			updateRecord(printTable, "status", status, "printID", printID)
 
 		if latitude != None:
-
 			updateRecord(printTable, "latitude", latitude, "printID", printID)
 
 		if longitude != None:
@@ -68,3 +68,51 @@ def updateRecord(table, column, value, identifier, idVal):
 	cnx.commit()
 	cursor.close()
 	cnx.close()
+
+
+## SQL getting should happen through this function. 
+## Note that usage of %s in python causes automatic escaping
+def getRecord(table, column, identifier, idVal):
+	cnx    = mysql.connector.connect(user=usr, database=database)
+	cursor = cnx.cursor()
+	data   = (table, identifier, idVal)
+
+	# check if the key with identifier=idVal is in the table; if not, it needs to be inserted
+	cmd  = "SELECT 1 FROM %s WHERE %s=%s"
+
+	# record exists
+	if (cursor.execute(cmd), data):
+		cmd = "SELECT %s from %s WHERE %s=%s"
+		data = (table, column, identifier, idVal)
+		val = cursor.execute(cmd, data)
+
+	# record does not exist
+	else:
+		val = 0;
+	
+	cursor.execute(cmd, data)
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+	return val
+
+
+def getPrinterID(buildingName, roomNumber):
+	cnx    = mysql.connector.connect(user=usr, database=database)
+	cursor = cnx.cursor()
+	cmd    = "SELECT 1 FROM %s WHERE buildingName=%s AND roomNumber=%s"
+	data   = (printTable, buildingName, roomNumber)
+	val    = cursor.execute(cmd, data);
+	if (val > 0):
+		cmd = "SELECT id FROM %s WHERE buildingName=%s AND roomNumber=%s"
+		val = cursor.execute(cmd, data);
+	else:
+		cmd = "SELECT currentID FROM %s WHERE name=printers"
+		val = cursor.execute(cmd, data);
+		updateRecord("ids", "currentID", val+1, "name", "printers")
+
+	cnx.commit();
+	cursor.close();
+	cnx.close();
+
+
