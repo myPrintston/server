@@ -54,19 +54,19 @@ def updateRecord(table, columns, values, ids, idVals):
         cursor = cnx.cursor()
         constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
 
-        if (isinstance(columns, tuple))
+        if (isinstance(columns, tuple)):
         	columns = (columns,)
 
 
-        if (isinstance(values, tuple))
+        if (isinstance(values, tuple)):
         	values = (values,)
 
 
-        if (isinstance(ids, tuple))
+        if (isinstance(ids, tuple)):
         	ids = (ids,)
 
 
-        if (isinstance(idVals, tuple))
+        if (isinstance(idVals, tuple)):
         	idVals = (idVals,)
 
 
