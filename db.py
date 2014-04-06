@@ -1,4 +1,3 @@
-
 from __future__ import print_function
 from datetime import date, datetime, timedelta
 import MySQLdb as mdb
@@ -52,13 +51,13 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 ## If the specified field does not exist, creates a row for it.
 ## Excepts both tuples and strings
 def updateRecord(table, columns, values, ids, idVals):
+        constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
+
         # Convert everything to a tuple for consistent processing
         columns = (columns,)
         values = (values,)
         ids = (ids,)
         idVals = (idVals,)
-
-		constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
 
         # check if the key with identifier=idVal is in the table; if not, it needs to be inserted
         cmd  = "SELECT 1 FROM %s WHERE " % table
@@ -66,7 +65,7 @@ def updateRecord(table, columns, values, ids, idVals):
         exists = executeSQL(cmd)
 
         # record does not exist; create it with the basic ids and constraints
-        if (exists==0):
+        if (exists==None):
                 cmd  = "INSERT INTO %s" % table
                 cmd += ", ".join(map(str, ids))
                 cmd  = cmd.replace("'", "")             # removes extra quotes from str()
@@ -75,31 +74,32 @@ def updateRecord(table, columns, values, ids, idVals):
 
         cmd = "UPDATE %s SET " % table
         cmd += ", ".join('%s="%s"' % a for a in zip(columns, values))
-        cmd += "WHERE " + constraints
+        cmd += " WHERE " + constraints
         executeSQL(cmd)
 
 ## Retrieves the given column from the table, given constraints
 ## ids and idVals (provided as a string or tuple)
 def getRecord(table, column, ids, idVals):
+        constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
+
         # Convert everything to a tuple for consistent processing
         ids = (ids,)
         idVals = (idVals,)
 
-		constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
-
-        # check if the key with identifier=idVal is in the table; 
+        # check if the key with identifier=idVal is in the table;
         # if not, return "NULL"
         cmd  = "SELECT 1 FROM %s WHERE " % table
         cmd += constraints
         exists = executeSQL(cmd)
 
         # Nothing obtained
-        if (exists == 0):
-        	return "NULL";
+        if (exists == None):
+                return "NULL";
 
-        # Something exists for the given constraints; return the value from 
+        # Something exists for the given constraints; return the value from
         # the given column
-        cmd  = "SELECT %s FROM %s WHERE " % column, table
+        cmd  = "SELECT %s FROM " % column
+        cmd += "%s WHERE " % table
         cmd += constraints
         return executeSQL(cmd)
 
@@ -108,15 +108,9 @@ def executeSQL(cmd):
         cnx    = mdb.connect(host,usr, pw,db)
         cursor = cnx.cursor()
         print (cmd)
-        val = cursor.execute(cmd)
+        cursor.execute(cmd)
+        val = cursor.fetchone()
         cnx.commit()
         cursor.close()
         cnx.close()
         return val
-
-
-updatePrinter("White House", "Baracks Room", force=1)
-updatePrinter("White House", "Baracks Room", force=1, longitude=0.0034)
-updatePrinter("Grand Sultan's House", "Sultan's Room", force=1)
-updatePrinter("Bob's Pizza Parlor", "Pizza Room", force=1, altitude=0.1)
-updatePrinter("Grandma", "Jane", force=1)
