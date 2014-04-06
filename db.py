@@ -15,7 +15,7 @@ idTable    = "ids"             # Name of table for assigning ids
 ## Given a printer buildingName, roomNumber, and any other data about a printer, updates the corresponding printer record
 ## Forces an update if force is true; otherwise, depends on whether an error is set; if not, the record is updated. if so,
 ## the record is only allowed to update if the current time minus the time it was last updated is larger than minTime
-def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude = None, longitude = None,
+def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude = None, longitude = None, statusMsg = None
         altitude = None):
 
         update = force
@@ -30,6 +30,9 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 
                 if status != None:
                         updateRecord(printTable, "status", status, loc, locVal)
+
+                if statusMsg != None:
+                        updateRecord(printTable, "statusMsg", statusMsg, loc, locVal)
 
                 if latitude != None:
                         updateRecord(printTable, "latitude", latitude, loc, locVal)

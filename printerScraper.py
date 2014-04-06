@@ -55,9 +55,11 @@ iterations = 1
 import mechanize
 from bs4 import BeautifulSoup
 
+
+# Scripts for myPrintsTon
 import db
 
-
+    
 # already built into Python
 import sys
 import os
@@ -118,10 +120,9 @@ for i in range(0, iterations):
             statuses.append(status)
 
     for i in range(0, len(buildings)):
-        updatePrinter(buildings[i], rooms[i], force=0, status=statuses[i])
+        db.updatePrinter(buildings[i], rooms[i], force=0, statusMsg=statuses[i])
         print 'Location:', buildings[i], '-', rooms[i]
         print 'Status:', statuses[i]
-    print_line()
     sleep(delay)
 
 
