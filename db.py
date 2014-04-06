@@ -1,10 +1,13 @@
 
 from __future__ import print_function
 from datetime import date, datetime, timedelta
-import mysql.connector
+import MySQLdb as mdb
+import re
 
 usr        = "ubuntu"          # Username for database
-database   = "printers"        # Name of database
+host       = "localhost"       # Host name for database
+db         = "printers"        # Name of database
+pw         = ""                # Password for database
 printTable = "printers"        # Name of table for printers
 errorTable = "errors"          # Name of table for errors
 idTable    = "ids"             # Name of table for assigning ids
@@ -47,76 +50,49 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 ## Updates the value of column in table for the with an identifier column that has the value idVal
 ## All SQL updating should happen through this function.
 ## If the specified field does not exist, creates a row for it.
-## Note that usage of %s in python causes automatic escaping
+#E Note that usage of %s in python causes automatic escaping
 def updateRecord(table, columns, values, ids, idVals):
-
-        cnx    = mysql.connector.connect(user=usr, database=database)
-        cursor = cnx.cursor()
         constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
-
-        if (isinstance(columns, tuple)):
-        	columns = (columns,)
-
-
-        if (isinstance(values, tuple)):
-        	values = (values,)
-
-
-        if (isinstance(ids, tuple)):
-        	ids = (ids,)
-
-
-        if (isinstance(idVals, tuple)):
-        	idVals = (idVals,)
-
+        inserted = 0
+        columns = (columns,)
+        values = (values,)
+        ids = (ids,)
+        idVals = (idVals,)
 
         # check if the key with identifier=idVal is in the table; if not, it needs to be inserted
         cmd  = "SELECT 1 FROM %s WHERE " % table
         cmd += constraints
 
-        print (cmd)
+        exists = executeSQL(cmd)
 
         # record does not exist; create it
-        if (cursor.execute(cmd)==0):
-                c = "INSERT INTO %s () VALUES ()" % table
-                print (c)
-                cursor.execute(c)
+        if (exists==0):
+                cmd  = "INSERT INTO %s" % table
+                cmd += ", ".join(map(str, ids))
+                cmd  = cmd.replace("'", "")             # removes extra quotes from str()
+                cmd += " VALUES " + ", ".join(map(str, idVals)) + ""
+                executeSQL(cmd)
 
-        c = ", ".join('%s="%s"' % a for a in zip(columns, values));
         cmd = "UPDATE %s SET " % table
-        cmd += c + " WHERE " + constraints                
-
-        print (cmd)
-        cursor.execute(cmd)
-        cnx.commit()
-        cursor.close()
-        cnx.close()
-
+        cmd += ", ".join('%s="%s"' % a for a in zip(columns, values))
+        cmd += "WHERE " + constraints
+        executeSQL(cmd)
 
 ## SQL getting should happen through this function.
 ## Note that usage of %s in python causes automatic escaping
-def getRecord(table, column, identifier, idVal):
-        cnx    = mysql.connector.connect(user=usr, database=database)
+def executeSQL(cmd):
+        cnx    = mdb.connect(host,usr, pw,db)
         cursor = cnx.cursor()
-        data   = (table, identifier, idVal)
-
-        # check if the key with identifier=idVal is in the table; if not, it needs to be inserted
-        cmd  = "SELECT 1 FROM %s WHERE %s=%s"
-
-        # record exists
-        if (cursor.execute(cmd), data):
-                cmd = "SELECT %s from %s WHERE %s=%s"
-                data = (table, column, identifier, idVal)
-                val = cursor.execute(cmd, data)
-
-        # record does not exist
-        else:
-                val = 0;
-
-        cursor.execute(cmd, data)
+        print (cmd)
+        val = cursor.execute(cmd)
         cnx.commit()
         cursor.close()
         cnx.close()
         return val
 
-updatePrinter(("White House"), ("Baracks Room"), force=1);
+
+updatePrinter("White House", "Baracks Room", force=1)
+updatePrinter("White House", "Baracks Room", force=1, longitude=0.0034)
+updatePrinter("Grand Sultan's House", "Sultan's Room", force=1)
+updatePrinter("Bob's Pizza Parlor", "Pizza Room", force=1, altitude=0.1)
+updatePrinter("Grandma", "Jane", force=1)
