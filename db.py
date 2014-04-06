@@ -50,22 +50,22 @@ def updatePrinter(buildingName, roomNumber, force = 0, status = None, latitude =
 ## Updates the value of column in table for the with an identifier column that has the value idVal
 ## All SQL updating should happen through this function.
 ## If the specified field does not exist, creates a row for it.
-#E Note that usage of %s in python causes automatic escaping
+## Excepts both tuples and strings
 def updateRecord(table, columns, values, ids, idVals):
-        constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
-        inserted = 0
+        # Convert everything to a tuple for consistent processing
         columns = (columns,)
         values = (values,)
         ids = (ids,)
         idVals = (idVals,)
 
+		constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
+
         # check if the key with identifier=idVal is in the table; if not, it needs to be inserted
         cmd  = "SELECT 1 FROM %s WHERE " % table
         cmd += constraints
-
         exists = executeSQL(cmd)
 
-        # record does not exist; create it
+        # record does not exist; create it with the basic ids and constraints
         if (exists==0):
                 cmd  = "INSERT INTO %s" % table
                 cmd += ", ".join(map(str, ids))
@@ -78,8 +78,32 @@ def updateRecord(table, columns, values, ids, idVals):
         cmd += "WHERE " + constraints
         executeSQL(cmd)
 
-## SQL getting should happen through this function.
-## Note that usage of %s in python causes automatic escaping
+## Retrieves the given column from the table, given constraints
+## ids and idVals (provided as a string or tuple)
+def getRecord(table, column, ids, idVals):
+        # Convert everything to a tuple for consistent processing
+        ids = (ids,)
+        idVals = (idVals,)
+
+		constraints = " AND ".join('%s="%s"' % a for a in zip(ids, idVals))
+
+        # check if the key with identifier=idVal is in the table; 
+        # if not, return "NULL"
+        cmd  = "SELECT 1 FROM %s WHERE " % table
+        cmd += constraints
+        exists = executeSQL(cmd)
+
+        # Nothing obtained
+        if (exists == 0):
+        	return "NULL";
+
+        # Something exists for the given constraints; return the value from 
+        # the given column
+        cmd  = "SELECT %s FROM %s WHERE " % column, table
+        cmd += constraints
+        return executeSQL(cmd)
+
+## Executes the given SQL command.
 def executeSQL(cmd):
         cnx    = mdb.connect(host,usr, pw,db)
         cursor = cnx.cursor()
