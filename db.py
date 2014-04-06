@@ -63,22 +63,27 @@ def updateRecord(table, columns, values, ids, idVals):
         idVals = (idVals,)
 
         # check if the key with identifier=idVal is in the table; if not, it needs to be inserted
-        cmd  = "SELECT 1 FROM %s WHERE " % table
-        cmd += constraints
-        exists = executeSQL(cmd)
+        cmd  = "SELECT 1 FROM %s WHERE %s"
+        inputs = (table, constraints)
+        exists = executeSQL(cmd, inputs)
 
         # record does not exist; create it with the basic ids and constraints
         if (exists==None):
-                cmd  = "INSERT INTO %s" % table
-                cmd += ", ".join(map(str, ids))
-                cmd  = cmd.replace("'", "")             # removes extra quotes from str()
-                cmd += " VALUES " + ", ".join(map(str, idVals)) + ""
-                executeSQL(cmd)
+                cmd  = "INSERT INTO %s %s VALUES %s" % table
+                a = ", ".join(map(str, ids))
+                a = a.replace("'", "")
+                b = ", ".join(map(str, idVals))
+              #  cmd += ", ".join(map(str, ids))
+              #  cmd  = cmd.replace("'", "")             # removes extra quotes from str()
+               # cmd += " VALUES " + ", ".join(map(str, idVals)) + ""
+                inputs = (table, a, b)
+                executeSQL(cmd, inputs)
 
-        cmd = "UPDATE %s SET " % table
-        cmd += ", ".join('%s="%s"' % a for a in zip(columns, values))
-        cmd += " WHERE " + constraints
-        executeSQL(cmd)
+        cmd = "UPDATE %s SET %s WHERE %s"
+        a = ", ".join('%s="%s"' % a for a in zip(columns, values))
+        #cmd += " WHERE " + constraints
+        inputs = (table, a, constraints)
+        executeSQL(cmd, inputs)
 
 ## Retrieves the given column from the table, given constraints
 ## ids and idVals (provided as a string or tuple)
@@ -91,9 +96,10 @@ def getRecord(table, column, ids, idVals):
 
         # check if the key with identifier=idVal is in the table;
         # if not, return "NULL"
-        cmd  = "SELECT 1 FROM %s WHERE " % table
-        cmd += constraints
-        exists = executeSQL(cmd)
+        cmd  = "SELECT 1 FROM %s WHERE %s"
+        inputs = (table, constraints)
+      #  cmd += constraints
+        exists = executeSQL(cmd, inputs)
 
         # Nothing obtained
         if (exists == None):
@@ -101,19 +107,20 @@ def getRecord(table, column, ids, idVals):
 
         # Something exists for the given constraints; return the value from
         # the given column
-        cmd  = "SELECT %s FROM " % column
-        cmd += "%s WHERE " % table
-        cmd += constraints
-        return executeSQL(cmd)
+        cmd  = "SELECT %s FROM %s WHERE %s" #% column
+        #cmd += "%s WHERE " % table
+        #cmd += constraints
+        inputs = (column, table, constraints)
+        return executeSQL(cmd, inputs)
 
 ## Executes the given SQL command.
-def executeSQL(cmd):
-        cnx    = mdb.connect(host,usr, pw,db)
+def executeSQL(cmd, inputs):
+        cnx    = mdb.connect(host,usr, pw,db, charset='utf8', use_unicode=true)
         cursor = cnx.cursor()
         print (cmd)
-        cursor.execute(cmd)
+        cursor.execute(cmd, inputs)
         val = cursor.fetchone()
         cnx.commit()
         cursor.close()
         cnx.close()
-        return val
+        return val;
