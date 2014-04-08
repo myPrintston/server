@@ -1,3 +1,4 @@
+
 # ======================================================================
 
 # Before this will work, you may need to install BeautifulSoup and
@@ -44,10 +45,10 @@
 # SETTINGS CAN BE MODIFIED HERE
 
 # delay in seconds
-delay = 5
+delay = 600
 
 # number of times you want it to query
-iterations = 1
+iterations = 5
 
 # ======================================================================
 
@@ -57,9 +58,9 @@ from bs4 import BeautifulSoup
 
 
 # Scripts for myPrintsTon
-import db
+import dbQuery
 
-    
+
 # already built into Python
 import sys
 import os
@@ -120,13 +121,7 @@ for i in range(0, iterations):
             statuses.append(status)
 
     for i in range(0, len(buildings)):
-        db.updatePrinter(buildings[i], rooms[i], force=0, statusMsg=statuses[i])
+        dbQuery.updatePrinter((buildings[i])[1:len(buildings[i])-1], (rooms[i])[1:len(rooms[i])-1], force=0, statusMsg=(statuses[i])[1:len(statuses[i])-1])
         print 'Location:', buildings[i], '-', rooms[i]
         print 'Status:', statuses[i]
     sleep(delay)
-
-
-
-
-
-
