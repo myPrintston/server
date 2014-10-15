@@ -69,7 +69,7 @@ while (c == None):
 br = mechanize.Browser()
 br.set_handle_refresh(False)
 
-building_re = re.compile('Building:.*')
+building_re = re.compile('>.*</name>')
 room_re = re.compile('Room:.*')
 printinfo_re = re.compile('Printer\(s\):.*')
 
@@ -99,7 +99,6 @@ while (True):
     try:
         br.open(url)
         soup = BeautifulSoup(br.response().read())
-
         placemark_tags = soup.find_all('placemark')
         coordinate_tags = soup.find_all('coordinates')
 
@@ -107,19 +106,16 @@ while (True):
         for pm in placemark_tags:
             pm_str = str(pm)
 
-            # building
-
             building_raw_list = building_re.findall(pm_str)
+
             for bldg_raw in building_raw_list:
-                # print bldg_raw
-                building = bldg_raw[len("building: "):len(bldg_raw) - len("<br>")]
-                # print building
+                building = bldg_raw[len("<"):len(bldg_raw) - len("</name>")]
                 buildings.append(building)
 
             # room
             room_raw_list = room_re.findall(pm_str)
             for room_raw in room_raw_list:
-                room = room_raw[len("Room: "):len(room_raw) - len("<br>")]
+                room = room_raw[len("Room: "):len(room_raw) - len("<br> ")]
                 rooms.append(room)
 
             printinfo_raw_list = printinfo_re.findall(pm_str)
@@ -145,9 +141,10 @@ while (True):
 
                     # str rep of color
                     colors_str_raw = color_re.findall(indiv_printer)
-                    color_str = colors_str_raw[0].lstrip("'").rstrip("'")
-
-                    colors_str.append(color_str)
+		    if len(colors_str_raw) == 0:
+			colors_str_raw = ['#000000']
+		    color_str = colors_str_raw[0].lstrip("'").rstrip("'")
+        	    colors_str.append(color_str)
 
                     if all_colors.count(color_str) == 0:
                         color_int = 1
@@ -195,22 +192,23 @@ while (True):
                 longitudes.append(longitude)
                 # print 'Longitude: ', str(longitude)
 
-    #    for i in range(0, len(buildings)):
-            # print 'Building:'.ljust(19), buildings[i]
-            # print 'Room:'.ljust(19), rooms[i]
-            # print 'Number of printers:'.ljust(19), num_printers[i]
-            # print 'Color:'.ljust(19), colors[i]
-            # print 'Status:'.ljust(19), statuses[i]
-            # print 'Longitude:'.ljust(19), longitudes[i]
-            # print 'Latitude:'.ljust(19), latitudes[i]
-
-            # print '--------------------'
+# 	for i in range(0, len(buildings)):
+#            print 'Building:'.ljust(19), buildings[i]
+#            print 'Room:'.ljust(19), rooms[i]
+#            print 'Number of printers:'.ljust(19), num_printers[i]
+#            print 'Color:'.ljust(19), colors[i]
+#            print 'Status:'.ljust(19), statuses[i]
+#            print 'Longitude:'.ljust(19), longitudes[i]
+#            print 'Latitude:'.ljust(19), latitudes[i]
+#
+#            print '--------------------'
 
         canDelete = 0
 
         if (curIter == delIterations):
             curIter = 0
             canDelete = 19
+
 
         setPrinters(canDelete = canDelete, buildings = buildings, rooms = rooms, statuses = colors, latitudes = latitudes, longitudes = longitudes, statusMsgs = statuses)
         curIter += 1
