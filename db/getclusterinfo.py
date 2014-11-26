@@ -76,7 +76,7 @@ printinfo_re = re.compile('Printer\(s\):.*')
 latitude_re = re.compile(',.+,0</coordinates>')
 longitude_re = re.compile('<coordinates>.*\d\d\.')
 
-color_re = re.compile("'.*'")
+color_re = re.compile("#\w\w\w\w\w\w")
 status_re = re.compile('>.*<')
 all_colors = ['#00aa00', '#ccbb00', '#dd0000']
 
@@ -119,7 +119,7 @@ while (True):
                 rooms.append(room)
 
             printinfo_raw_list = printinfo_re.findall(pm_str)
-            all_printer_re = re.compile("<font color=.*</font>")
+    	    all_printer_re = re.compile("<font color=.*</font>")
             for printinfo_raw in printinfo_raw_list:
 
                 colors_str = []
@@ -138,8 +138,7 @@ while (True):
 
 
                 for indiv_printer in indiv_printer_list:
-
-                    # str rep of color
+                     # str rep of color
                     colors_str_raw = color_re.findall(indiv_printer)
 		    if len(colors_str_raw) == 0:
 			colors_str_raw = ['#000000']
@@ -210,6 +209,7 @@ while (True):
             canDelete = 19
 
 
+        setPrinters(canDelete = canDelete, buildings = buildings, rooms = rooms, statuses = colors, latitudes = latitudes, longitudes = longitudes, statusMsgs = statuses)
         setPrinters(canDelete = canDelete, buildings = buildings, rooms = rooms, statuses = colors, latitudes = latitudes, longitudes = longitudes, statusMsgs = statuses)
         curIter += 1
 
